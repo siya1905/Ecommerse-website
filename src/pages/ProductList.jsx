@@ -102,7 +102,7 @@ function ProductList() {
         </p>
 
         <button className="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white font-medium py-2.5 rounded-lg transition">
-          Add to Cart
+          add to cart your wishlist
         </button>
       </div>
     </div>
