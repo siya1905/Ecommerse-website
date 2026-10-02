@@ -17,11 +17,28 @@ function ProductList() {
         console.log("🚀 ~ ProductList ~ response:", response.data.data);
         setProduct(response.data.data);
         toast.success(response.statusText);
+        // localStorage.setItem("cart",TOKEN)
       })
       .catch((error) => {
         toast.error(error.response?.statusText || "use not exits");
       });
   }, []);
+
+  const addToCart = (item) => {
+    // old data from local
+    const cartData = localStorage.getItem("cart");
+
+    // converted string to array
+    const cart = cartData ? JSON.parse(cartData) : [];
+
+    //i have added clicked product
+    cart.push(item);
+
+    // array to string then save that
+    localStorage.setItem("cart", JSON.stringify(cart));
+
+    console.log("Cart:", cart);
+  };
 
   return (
     <>
@@ -34,7 +51,7 @@ function ProductList() {
         </div>
       ))} */}
 
-    {/*   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
+      {/*   <div className="grid grid-cols-1 md:grid-cols-3 gap-6 p-6">
         {product.map((item) => (
           <div
             key={item._id}
@@ -67,49 +84,47 @@ function ProductList() {
         ))}
       </div> */}
 
-    
-<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
-  {product.map((item) => (
-    <div
-      key={item._id}
-      className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition"
-    >
-      {/* Image */}
-      <div className="h-60 bg-gray-100">
-        <img
-          src={item.image}
-          alt={item.name}
-          className="w-full h-full object-cover"
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+        {product.map((item) => (
+          <div
+            key={item._id}
+            className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition"
+          >
+            {/* Image */}
+            <div className="h-60 bg-gray-100">
+              <img
+                src={item.image}
+                alt={item.name}
+                className="w-full h-full object-cover"
+              />
+            </div>
+
+            {/* Details */}
+            <div className="p-5">
+              <h2 className="text-xl font-semibold text-gray-800">
+                {item.name}
+              </h2>
+
+              <p className="text-gray-500 mt-2 line-clamp-2">
+                {item.description}
+              </p>
+
+              <p className="text-xl font-bold text-orange-500 mt-4">
+                ₹{item.price}
+              </p>
+
+              <p className="text-sm text-gray-500 mt-1">Stock: {item.stock}</p>
+
+              <button
+                onClick={() => addToCart(item)}
+                className="w-full mt-4 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-medium py-2.5 rounded-lg shadow-sm active:translate-y-[1px] transition-all duration-100 cursor-pointer"
+              >
+                Add to cart
+              </button>
+            </div>
+          </div>
+        ))}
       </div>
-
-      {/* Details */}
-      <div className="p-5">
-        <h2 className="text-xl font-semibold text-gray-800">
-          {item.name}
-        </h2>
-
-        <p className="text-gray-500 mt-2 line-clamp-2">
-          {item.description}
-        </p>
-
-        <p className="text-xl font-bold text-orange-500 mt-4">
-          ₹{item.price}
-        </p>
-
-        <p className="text-sm text-gray-500 mt-1">
-          Stock: {item.stock}
-        </p>
-
-        <button className="w-full mt-4 bg-orange-500 hover:bg-orange-600 text-white font-medium py-2.5 rounded-lg transition">
-          add to cart your wishlist
-        </button>
-      </div>
-    </div>
-  ))}
-</div>
-
-
     </>
   );
 }

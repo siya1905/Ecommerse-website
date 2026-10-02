@@ -61,6 +61,7 @@ import Category from "../pages/category";
 import Layout from "../components/layout";
 import GetAllCategory from "../pages/getAllCategory";
 import ProductList from "../pages/ProductList";
+import ViewCart from "../pages/viewCart";
 
 function Router() {
   return (
@@ -77,6 +78,7 @@ function Router() {
 
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/view-cart" element={<ViewCart />} />
       </Routes>
     </BrowserRouter>
   );
