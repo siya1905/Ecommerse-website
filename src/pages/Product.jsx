@@ -1,168 +1,221 @@
-  import axios from "axios";
-  import { useState, useEffect } from "react";
-  import { TOKEN } from "../constant/token";
-  import { toast } from "react-toastify";
+import axios from "axios";
+import { useState, useEffect } from "react";
+import { TOKEN } from "../constant/token";
+import { toast } from "react-toastify";
 
-  function Product() {
-    const [name, setName] = useState("");
-    console.log("🚀 ~ Product ~ name:", name);
-    const [description, setDescription] = useState("");
-    const [price, setPrice] = useState("");
-    const [stock, setStock] = useState("");
-    const [image, setImage] = useState(null);
-    console.log("🚀 ~ Product ~ image:", image);
-    const [categaires, setCategaires] = useState([]);
-    const [detail,setDetail] = useState([]);
+function Product() {
+  const [name, setName] = useState("");
+  console.log("🚀 ~ Product ~ name:", name);
+  const [description, setDescription] = useState("");
+  const [price, setPrice] = useState("");
+  const [stock, setStock] = useState("");
+  const [image, setImage] = useState(null);
+  console.log("🚀 ~ Product ~ image:", image);
+  const [categaires, setCategaires] = useState([]);
+  const [detail, setDetail] = useState([]);
 
-    const [selectCategory, setSelectCategory] = useState("");
-    console.log("🚀 ~ Product ~ selectCategory:", selectCategory)
+  const [selectCategory, setSelectCategory] = useState("");
+  console.log("🚀 ~ Product ~ selectCategory:", selectCategory);
 
-    useEffect(() => {
-      if (!TOKEN) return;
-      allCategory();
-    }, [TOKEN]);
+  const [editProductId, setEditProductId] = useState(null);
 
-    const allCategory = () => {
-      const token = localStorage.getItem("token");
+  const editProduct = (product) => {
+    setEditProductId(product._id);
+    setName(product.name);
+    setDescription(product.description);
+    setPrice(product.price);
+    setStock(product.stock);
+    setSelectCategory(product.category?._id || product.category);
+  };
 
-      console.log("TOKEN FROM STORAGE:", token);
+  useEffect(() => {
+    if (!TOKEN) return;
+    allCategory();
+  }, [TOKEN]);
 
-      axios
-        .get(`${import.meta.env.VITE_API_URL}/api/category/get-all`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
-          console.log("🚀 ~ getProfile ~ response:", response);
+  const allCategory = () => {
+    const token = localStorage.getItem("token");
 
-          setCategaires(response.data.data);
-          toast.success(response.statusText);
-        })
-        .catch((error) => {
-          console.log("🚀 ~ getProfile ~ error:", error);
-          toast.error(error.response?.statusText || "user not exits");
+    console.log("TOKEN FROM STORAGE:", token);
+
+    axios
+      .get(`${import.meta.env.VITE_API_URL}/api/category/get-all`, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        console.log("🚀 ~ getProfile ~ response:", response);
+
+        setCategaires(response.data.data);
+        toast.success(response.statusText);
+      })
+      .catch((error) => {
+        console.log("🚀 ~ getProfile ~ error:", error);
+        toast.error(error.response?.statusText || "user not exits");
+      });
+  };
+
+  function getProduct() {
+    // Get token before making API request
+    //here it gets the same token that saved by login
+    const token = localStorage.getItem("token");
+
+    console.log("Token:", token);
+
+    const formData = new FormData();
+
+    formData.append("name", name);
+    formData.append("description", description);
+    formData.append("price", price);
+    formData.append("image", image);
+    formData.append("stock", stock);
+    //formData.append("categaires", categaires);
+    formData.append("category", selectCategory);
+
+    axios
+      .post(`${import.meta.env.VITE_API_URL}/api/products`, formData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      })
+      .then((response) => {
+        console.log("🚀 ~ getProduct ~ response:", response);
+
+        setDetail({
+          name,
+          description,
+          price,
+          stock,
+          image,
+          categaires,
         });
-    };
+      })
+      .catch((error) => {
+        console.log("Error:", error.response?.data || error);
+      });
+  }
 
-    function getProduct() {
-      // Get token before making API request
-      //here it gets the same token that saved by login
-      const token = localStorage.getItem("token");
+  console.log("🚀 ~ Product ~ categaires:", categaires);
 
-      console.log("Token:", token);
+  // 3. Add this function
+  const updateProduct = async () => {
+    const token = localStorage.getItem("token");
 
-      const formData = new FormData();
+    const formData = new FormData();
 
-      formData.append("name", name);
-      formData.append("description", description);
-      formData.append("price", price);
+    formData.append("name", name);
+    formData.append("description", description);
+    formData.append("price", price);
+    formData.append("stock", stock);
+    formData.append("category", selectCategory);
+
+    if (image) {
       formData.append("image", image);
-      formData.append("stock", stock);
-      //formData.append("categaires", categaires);
-      formData.append("category", selectCategory);
-      
-      axios
-        .post(`${import.meta.env.VITE_API_URL}/api/products`, formData, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
-        .then((response) => {
-          console.log("🚀 ~ getProduct ~ response:", response);
-
-          setDetail({
-            name,
-            description,
-            price,
-            stock,
-            image,
-            categaires,
-          });
-        })
-        .catch((error) => {
-          console.log("Error:", error.response?.data || error);
-        });
     }
 
-    console.log("🚀 ~ Product ~ categaires:", categaires);
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gray-100">
-        <div className="bg-white border rounded-lg p-6 w-96">
-          <h2 className="text-2xl font-bold text-center mb-5">Add Product</h2>
+    try {
+      await axios.put(
+        `${import.meta.env.VITE_API_URL}/api/products/${editProductId}`,
+        formData,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        },
+      );
 
-          <input
-            className="border rounded p-2 w-full mb-3"
-            type="text"
-            placeholder="Name"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
+      toast.success("Product updated successfully");
+    } catch (error) {
+      console.log(error);
+      toast.error("Update failed");
+    }
+  };
 
-          <input
-            className="border rounded p-2 w-full mb-3"
-            type="text"
-            placeholder="Description"
-            value={description}
-            onChange={(e) => setDescription(e.target.value)}
-          />
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+      <div className="bg-white border rounded-lg p-6 w-96">
+        <h2 className="text-2xl font-bold text-center mb-5">Add Product</h2>
+        
+        <input
+          className="border rounded p-2 w-full mb-3"
+          type="text"
+          placeholder="Name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
 
-          <input
-            className="border rounded p-2 w-full mb-3"
-            type="number"
-            placeholder="Price"
-            value={price}
-            onChange={(e) => setPrice(e.target.value)}
-          />
+        <input
+          className="border rounded p-2 w-full mb-3"
+          type="text"
+          placeholder="Description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+        />
 
-          {/* <input
+        <input
+          className="border rounded p-2 w-full mb-3"
+          type="number"
+          placeholder="Price"
+          value={price}
+          onChange={(e) => setPrice(e.target.value)}
+        />
+
+        {/* <input
           className="border rounded p-2 w-full mb-3"
           type="file"
           accept="image/*"
           onChange={(e) => setImage(e.target.files[0])}
         /> */}
-          <input
-            className="border rounded p-2 w-full mb-3
+        <input
+          className="border rounded p-2 w-full mb-3
               file:bg-gray-500 file:text-white
               file:border-0 file:rounded file:px-3 file:py-1
               file:mr-3"
-            type="file"
-            accept="image/*"
-            onChange={(e) => setImage(e.target.files[0])}
-          />
+          type="file"
+          accept="image/*"
+          onChange={(e) => setImage(e.target.files[0])}
+        />
 
-          <input
-            className="border rounded p-2 w-full mb-4"
-            type="number"
-            placeholder="Stock"
-            value={stock}
-            onChange={(e) => setStock(e.target.value)}
-          />
+        <input
+          className="border rounded p-2 w-full mb-4"
+          type="number"
+          placeholder="Stock"
+          value={stock}
+          onChange={(e) => setStock(e.target.value)}
+        />
 
-          <select
-            className="border rounded p-2 w-full mb-4"
-            value={selectCategory}
-            onChange={(e) => setSelectCategory(e.target.value)}
+        <select
+          className="border rounded p-2 w-full mb-4"
+          value={selectCategory}
+          onChange={(e) => setSelectCategory(e.target.value)}
+        >
+          <option value="">Select Category</option>
+
+          {categaires.map((list) => (
+            <option key={list._id} value={list._id}>
+              {list.name}
+            </option>
+          ))}
+        </select>
+
+        <div className="flex justify-center">
+          <button
+            className="bg-orange-500 text-white font-bold px-5 py-2 rounded hover:bg-amber-800"
+            onClick={getProduct}
           >
-            <option value="">Select Category</option>
+            Add Product
+          </button>
 
-            {categaires.map((list) => (
-              <option key={list._id} value={list._id}>
-                {list.name}
-              </option>
-            ))}
-          </select>
+          <button
+            onClick={() => editProduct(product)}
+            className="bg-orange-500 text-white font-bold px-5 py-2 rounded hover:bg-amber-800"
+          >
+            Edit Product
+          </button>
+        </div>
 
-          <div className="flex justify-center">
-            <button
-              className="bg-orange-500 text-white font-bold px-5 py-2 rounded"
-              onClick={getProduct}
-            >
-              Add Products
-            </button>
-          </div>
-
-          {/* {details && (
+        {/* {details && (
             <div className="mt-6 border-t pt-4">
               <h2 className="text-xl font-bold mb-3">Product Details</h2>
 
@@ -189,9 +242,9 @@
               </p>
             </div>
           )} */}
-        </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
-  export default Product;
+export default Product;
